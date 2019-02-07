@@ -1,27 +1,15 @@
 /* Copyright (GPL) 2004   Mike Chirico mchirico@comcast.net
    Updated: Sun Nov 28 15:15:05 EST 2004
-
    Program adapted by Mike Chirico mchirico@comcast.net
-
    Reference:
     http://prdownloads.sourceforge.net/souptonuts/working_with_time.tar.gz?download
     http://www.srrb.noaa.gov/highlights/sunrise/sunrise.html
-
-
   Compile:
-
      gcc -o sunrise -Wall -W -O2 -s -pipe -lm sunrise.c
-
   or for debug output
-
      gcc -o sunrise -DDEBUG=1 -Wall -W -O2 -s -pipe -lm sunrise.c
-
-
-
-
   This can also go in a batch job to calculate the next
   20 days as follows:
-
     #!/bin/bash
     lat=39.95
     long=75.15
@@ -29,8 +17,6 @@
     do
      ./sunrise    `date -d "+$i day" "+%Y %m %d"` $lat $long
     done
-
-
    
 */
 
@@ -45,7 +31,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "sunrise.h"
+//#include "sunrise.h"
 
 char *wake_time;
 char *sleep_time;
@@ -293,30 +279,31 @@ double calcSunsetUTC(double JD, double latitude, double longitude)
 		return timeUTC;
 	}
 
-int get_sunrise_sunset(void)
+int main(void)
 {
   char *wake_open = "7:0";
   char *sleep_close = "19:30";
- 
+
   time_t rawtime;
   struct tm* time_;
   time(&rawtime);
   time_ = localtime(&rawtime);
-  
+
   int year=time_->tm_year + 1900;
   int month=time_->tm_mon + 1;
   int day=time_->tm_mday;
   int dst= time_->tm_isdst;
   char buffer1[30];
   char buffer2[30];
-  
+
+
   //printf("Date is %d/%d/%d and DST is %d\n", month,day,year,dst);
 
   float JD=calcJD(year,month,day);
   double latitude = 36.1;  //convert to just degrees.  No min/sec
   double longitude = 84.13;
-  
-  
+
+
   time_t seconds;
   time_t tseconds;
   struct tm  *ptm=NULL;
@@ -331,7 +318,6 @@ int get_sunrise_sunset(void)
     longitude = atof(argv[5]);
     JD = calcJD(year,month,day);
     printf("Julian date is %f\n", JD);
-
   } else {
   
   printf("\nUsage: (note convert latitude and longitude to degrees) \n");
@@ -340,7 +326,6 @@ int get_sunrise_sunset(void)
   printf("\n US Listings Of Latitude and Longitude\n");
   printf("    http://www.census.gov/geo/www/tiger/latlng.txt\n");
   printf("    But use positive values for longitude for above listing\n");
-
   printf("\n Example: (Just outside Philadelphia PA, USA)\n\n");
   printf("./sunrise 2017 11 3 36.1 84.13 \n");
   printf("./sunrise `date \"+%cY %cm %cd\"` 36.1 84.13\n\n",'%','%','%');
@@ -363,7 +348,7 @@ int get_sunrise_sunset(void)
   tm.tm_hour=0;
   tm.tm_min=0;
   tm.tm_sec=0;
-  tm.tm_isdst=-1;  
+  tm.tm_isdst=-1;
 
   seconds = mktime(&tm);
   if(DEBUG)
@@ -375,16 +360,17 @@ int get_sunrise_sunset(void)
   dst=tm.tm_isdst;
 
 
+
   ptm = gmtime ( &seconds );
   delta= ptm->tm_hour;
 
   if(DEBUG)
     printf("delta=%d dst=%d\n",delta,dst);
-  
+
   tseconds= seconds;
   if(DEBUG)
    printf("Number of seconds %ld\n",seconds);
-   
+
   seconds= seconds + calcSunriseUTC( JD,  latitude,  longitude)*60;
   seconds= seconds - delta*3600;
 
@@ -392,10 +378,18 @@ int get_sunrise_sunset(void)
 
 
   strftime(buffer1,30,"%m-%d-%Y  %T",localtime(&seconds));
+  printf("Sunrise is %s\n", buffer1);
   wake_open = buffer1;
-  sprintf(wake_open, "%i:%i", time_->tm_hour, time_->tm_min);
+  if(time_->tm_min >= 30)
+	{
+  		sprintf(wake_open, "%i:%i", time_->tm_hour, time_->tm_min-30);
+ 	}
+  else
+	{
+		sprintf(wake_open, "%i:%i", time_->tm_hour-1, (time_->tm_min-30)+60);
+	}
   wake_time=wake_open;
-  printf("Wake from sunrise.c is %s\n", wake_time);
+  printf("Wake from sunrise.c is %s\n\n", wake_time);
 
 
 
@@ -404,9 +398,17 @@ int get_sunrise_sunset(void)
   seconds= seconds - delta*3600;
 
 
-  strftime(buffer2,30,"%m-%d-%Y  %T\n",localtime(&seconds));
+  strftime(buffer2,30,"%m-%d-%Y  %T",localtime(&seconds));
   sleep_close = buffer2;
-  sprintf(sleep_close, "%i:%i", time_->tm_hour+1, time_->tm_min);
+  printf("Sunset is %s\n", buffer2);
+  if(time_->tm_min >= 30)
+	{
+		sprintf(sleep_close, "%i:%i", time_->tm_hour+1, (time_->tm_min+30)-60);
+	}
+  else
+	{
+		sprintf(sleep_close, "%i:%i", time_->tm_hour, time_->tm_min+30);
+	}
   sleep_time=sleep_close;
   printf("sleep from sunrise.c is %s\n", sleep_time);
  
