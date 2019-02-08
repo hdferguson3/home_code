@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-//#include "sunrise.h"
+#include "sunrise.h"
 
 char *wake_time;
 char *sleep_time;
@@ -235,8 +235,7 @@ double calcSunriseUTC(double JD, double latitude, double longitude)
 
          eqTime = calcEquationOfTime(newt);
          solarDec = calcSunDeclination(newt);
-		
-		
+
 		hourAngle = calcHourAngleSunrise(latitude, solarDec);
 		delta = longitude - radToDeg(hourAngle);
 		timeDiff = 4 * delta;
@@ -266,8 +265,8 @@ double calcSunsetUTC(double JD, double latitude, double longitude)
 
          eqTime = calcEquationOfTime(newt);
          solarDec = calcSunDeclination(newt);
-		
-		
+
+
 		hourAngle = calcHourAngleSunset(latitude, solarDec);
 		delta = longitude - radToDeg(hourAngle);
 		timeDiff = 4 * delta;
@@ -279,7 +278,7 @@ double calcSunsetUTC(double JD, double latitude, double longitude)
 		return timeUTC;
 	}
 
-int main(void)
+int get_sunrise_sunset(void)
 {
   char *wake_open = "7:0";
   char *sleep_close = "19:30";
@@ -380,14 +379,15 @@ int main(void)
   strftime(buffer1,30,"%m-%d-%Y  %T",localtime(&seconds));
   printf("Sunrise is %s\n", buffer1);
   wake_open = buffer1;
-  if(time_->tm_min >= 30)
-	{
-  		sprintf(wake_open, "%i:%i", time_->tm_hour, time_->tm_min-30);
- 	}
-  else
-	{
-		sprintf(wake_open, "%i:%i", time_->tm_hour-1, (time_->tm_min-30)+60);
+  if(time_->tm_min >= 30){
+  	if(time_->tm_min-30 < 10){
+		sprintf(wake_open, "%i:0%i", time_->tm_hour, time_->tm_min-30);}
+	else{
+		sprintf(wake_open, "%i:%i", time_->tm_hour, time_->tm_min-30);}
 	}
+  else{
+	sprintf(wake_open, "%i:%i", time_->tm_hour-1, (time_->tm_min-30)+60);
+  }
   wake_time=wake_open;
   printf("Wake from sunrise.c is %s\n\n", wake_time);
 
@@ -401,14 +401,11 @@ int main(void)
   strftime(buffer2,30,"%m-%d-%Y  %T",localtime(&seconds));
   sleep_close = buffer2;
   printf("Sunset is %s\n", buffer2);
-  if(time_->tm_min >= 30)
-	{
-		sprintf(sleep_close, "%i:%i", time_->tm_hour+1, (time_->tm_min+30)-60);
-	}
-  else
-	{
-		sprintf(sleep_close, "%i:%i", time_->tm_hour, time_->tm_min+30);
-	}
+  if(time_->tm_min >= 30){
+	sprintf(sleep_close, "%i:%i", time_->tm_hour+1, (time_->tm_min+30)-60);}
+  else{
+	sprintf(sleep_close, "%i:%i", time_->tm_hour, time_->tm_min+30);
+  }
   sleep_time=sleep_close;
   printf("sleep from sunrise.c is %s\n", sleep_time);
  
