@@ -4,6 +4,7 @@
 #include <string.h>
 #include <wiringPi.h>
 #include "sunrise.h"
+#include <syslog.h>
 
 char sys_time[6];
 char *wake_time = "6:0"; // time to open door
@@ -29,6 +30,9 @@ void get_time()
 int main(void)
 {
 	printf ("Starting door_main\n");
+	openlog ("Coup Door", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	syslog (LOG_INFO, "Coup Door program start...");
+	closelog ();
 	wiringPiSetup ();
 	pinMode (4, OUTPUT); pinMode (5, OUTPUT); //Sets pins to output
 	digitalWrite (4, LOW); digitalWrite (5, LOW); //initializes to off
@@ -42,6 +46,9 @@ int main(void)
 		if (w == 0) //do if wake time
 		{
 			printf ("Door opened at %s\n", sys_time);
+			openlog ("Coup Door", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+        		syslog (LOG_INFO, "Door Open");
+        		closelog ();
 			digitalWrite (4, HIGH); digitalWrite (5, HIGH); // Sets forward motion
 			sleep (30);
 			digitalWrite (4, LOW); digitalWrite (5, LOW);; //sets motor to off
@@ -51,6 +58,9 @@ int main(void)
 		{
 			digitalWrite (4, HIGH); digitalWrite (5, LOW); // Sets reverse motion
 			printf ("Door closed at %s\n", sys_time);
+			openlog ("Coup Door", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+        		syslog (LOG_INFO, "Door Close");
+        		closelog ();
 			sleep (30);
 			digitalWrite (4, LOW); digitalWrite (5, LOW); // Sets motor off
 			sleep (30); //sleep an additional amount of time to not trigger twice on the minute
