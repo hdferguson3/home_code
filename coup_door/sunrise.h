@@ -14,8 +14,8 @@
 /************************ Function Prototypes *********************/
 
 
-extern char *wake_time;
-extern char *sleep_time;
+extern char wake_open[30];
+extern char sleep_close[30];
 /*extern int get_sunrise_sunset(void); 
 extern double calcObliquityCorrection(double_t);
 extern double calcEquationOfTime(double_t);

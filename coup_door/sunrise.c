@@ -30,11 +30,12 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "sunrise.h"
 
-char *wake_time;
-char *sleep_time;
+char wake_open[30];
+char sleep_close[30];
 
 
 double calcSunEqOfCenter(double t);
@@ -280,8 +281,8 @@ double calcSunsetUTC(double JD, double latitude, double longitude)
 
 int get_sunrise_sunset(void)
 {
-  char *wake_open = "7:0";
-  char *sleep_close = "19:30";
+  //char *wake_open = "07:00";
+  //char *sleep_close = "19:30";
 
   time_t rawtime;
   struct tm* time_;
@@ -372,24 +373,23 @@ int get_sunrise_sunset(void)
 
   seconds= seconds + calcSunriseUTC( JD,  latitude,  longitude)*60;
   seconds= seconds - delta*3600;
-
+  //seconds=tseconds;
+  //seconds+=calcSunsetUTC( JD, latitude, longitude)*60;
+  //seconds= seconds - delta*3600;
 
 
 
   strftime(buffer1,30,"%m-%d-%Y  %T",localtime(&seconds));
   printf("Sunrise is %s\n", buffer1);
-  wake_open = buffer1;
+  strcpy(wake_open,buffer1);
   if(time_->tm_min >= 30){
-  	if(time_->tm_min-30 < 10){
-		sprintf(wake_open, "%i:0%i", time_->tm_hour, time_->tm_min-30);}
-	else{
-		sprintf(wake_open, "%i:%i", time_->tm_hour, time_->tm_min-30);}
+  	sprintf(wake_open, "%02d:%02d", time_->tm_hour, time_->tm_min-30);
 	}
   else{
-	sprintf(wake_open, "%i:%i", time_->tm_hour-1, (time_->tm_min-30)+60);
+	sprintf(wake_open, "%02d:%02d", time_->tm_hour-1, (time_->tm_min-30)+60);
   }
-  wake_time=wake_open;
-  printf("Wake from sunrise.c is %s\n\n", wake_time);
+ 
+  printf("Wake from sunrise.c is %s\n\n", wake_open);
 
 
 
@@ -399,14 +399,14 @@ int get_sunrise_sunset(void)
 
 
   strftime(buffer2,30,"%m-%d-%Y  %T",localtime(&seconds));
-  sleep_close = buffer2;
   printf("Sunset is %s\n", buffer2);
+  strcpy(sleep_close,buffer2);
   if(time_->tm_min >= 30){
-	sprintf(sleep_close, "%i:%i", time_->tm_hour+1, (time_->tm_min+30)-60);}
+	sprintf(sleep_close, "%02d:%02d", time_->tm_hour+1, (time_->tm_min+30)-60);}
   else{
-	sprintf(sleep_close, "%i:%i", time_->tm_hour, time_->tm_min+30);
+	sprintf(sleep_close, "%02d:%02d", time_->tm_hour, time_->tm_min+30);
   }
-  sleep_time=sleep_close;
-  printf("sleep from sunrise.c is %s\n", sleep_time);
+
+  printf("sleep from sunrise.c is %s\n", sleep_close);
  
 }
