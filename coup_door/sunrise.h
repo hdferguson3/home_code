@@ -16,6 +16,9 @@
 
 extern char wake_open[30];
 extern char sleep_close[30];
+extern int get_sunrise();
+extern int get_sunset();
+extern int get_current();
 /*extern int get_sunrise_sunset(void); 
 extern double calcObliquityCorrection(double_t);
 extern double calcEquationOfTime(double_t);

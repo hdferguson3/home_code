@@ -1,0 +1,4 @@
+gcc main.c sunrise.c -o coup_door -lm -lwiringPi
+
+// see wiring instructions here: http://wiringpi.com/pins/
+// cytron motor controller md10c-R3

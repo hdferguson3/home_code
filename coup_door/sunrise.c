@@ -279,11 +279,9 @@ double calcSunsetUTC(double JD, double latitude, double longitude)
 		return timeUTC;
 	}
 
-int get_sunrise_sunset(void)
+int get_sunrise(void)
 {
-  //char *wake_open = "07:00";
-  //char *sleep_close = "19:30";
-
+  
   time_t rawtime;
   struct tm* time_;
   time(&rawtime);
@@ -296,9 +294,6 @@ int get_sunrise_sunset(void)
   char buffer1[30];
   char buffer2[30];
 
-
-  //printf("Date is %d/%d/%d and DST is %d\n", month,day,year,dst);
-
   float JD=calcJD(year,month,day);
   double latitude = 36.1;  //convert to just degrees.  No min/sec
   double longitude = 84.13;
@@ -309,38 +304,12 @@ int get_sunrise_sunset(void)
   struct tm  *ptm=NULL;
   struct tm  tm;
 
-/*
-  if(argc == 6) {
-    year=atoi(argv[1]);
-    month=atoi(argv[2]);
-    day=atoi(argv[3]);
-    latitude = atof(argv[4]);
-    longitude = atof(argv[5]);
-    JD = calcJD(year,month,day);
-    printf("Julian date is %f\n", JD);
-  } else {
-  
-  printf("\nUsage: (note convert latitude and longitude to degrees) \n");
-  printf("./sunrise year month date latitude longitude \n\n");
-  printf(" Latitude and longitude must be in degrees and or fraction of degrees. Not min sec\n");
-  printf("\n US Listings Of Latitude and Longitude\n");
-  printf("    http://www.census.gov/geo/www/tiger/latlng.txt\n");
-  printf("    But use positive values for longitude for above listing\n");
-  printf("\n Example: (Just outside Philadelphia PA, USA)\n\n");
-  printf("./sunrise 2017 11 3 36.1 84.13 \n");
-  printf("./sunrise `date \"+%cY %cm %cd\"` 36.1 84.13\n\n",'%','%','%');
- 
-  }
-*/
-
  if(DEBUG)
   printf("Julian Date  %f \n",JD);
  if(DEBUG)
   printf("Sunrise timeUTC %lf \n", calcSunriseUTC( JD,  latitude,  longitude));
  if(DEBUG)
   printf("Sunset  timeUTC %lf \n", calcSunsetUTC( JD,  latitude,  longitude));
-
-
 
   tm.tm_year= year-1900;
   tm.tm_mon=month-1;  /* Jan = 0, Feb = 1,.. Dec = 11 */
@@ -359,8 +328,6 @@ int get_sunrise_sunset(void)
 
   dst=tm.tm_isdst;
 
-
-
   ptm = gmtime ( &seconds );
   delta= ptm->tm_hour;
 
@@ -373,40 +340,80 @@ int get_sunrise_sunset(void)
 
   seconds= seconds + calcSunriseUTC( JD,  latitude,  longitude)*60;
   seconds= seconds - delta*3600;
-  //seconds=tseconds;
-  //seconds+=calcSunsetUTC( JD, latitude, longitude)*60;
-  //seconds= seconds - delta*3600;
-
-
-
-  strftime(buffer1,30,"%m-%d-%Y  %T",localtime(&seconds));
-  printf("Sunrise is %s\n", buffer1);
-  strcpy(wake_open,buffer1);
-  if(time_->tm_min >= 30){
-  	sprintf(wake_open, "%02d:%02d", time_->tm_hour, time_->tm_min-30);
-	}
-  else{
-	sprintf(wake_open, "%02d:%02d", time_->tm_hour-1, (time_->tm_min-30)+60);
-  }
- 
-  printf("Wake from sunrise.c is %s\n\n", wake_open);
-
-
-
-  seconds=tseconds;
-  seconds+=calcSunsetUTC( JD,  latitude,  longitude)*60;
-  seconds= seconds - delta*3600;
-
-
-  strftime(buffer2,30,"%m-%d-%Y  %T",localtime(&seconds));
-  printf("Sunset is %s\n", buffer2);
-  strcpy(sleep_close,buffer2);
-  if(time_->tm_min >= 30){
-	sprintf(sleep_close, "%02d:%02d", time_->tm_hour+1, (time_->tm_min+30)-60);}
-  else{
-	sprintf(sleep_close, "%02d:%02d", time_->tm_hour, time_->tm_min+30);
-  }
-
-  printf("sleep from sunrise.c is %s\n", sleep_close);
- 
+  return seconds;
 }
+
+int get_sunset(void)
+{
+  
+  time_t rawtime;
+  struct tm* time_;
+  time(&rawtime);
+  time_ = localtime(&rawtime);
+
+  int year=time_->tm_year + 1900;
+  int month=time_->tm_mon + 1;
+  int day=time_->tm_mday;
+  int dst= time_->tm_isdst;
+  char buffer1[30];
+  char buffer2[30];
+
+  float JD=calcJD(year,month,day);
+  double latitude = 36.1;  //convert to just degrees.  No min/sec
+  double longitude = 84.13;
+
+
+  time_t seconds;
+  time_t tseconds;
+  struct tm  *ptm=NULL;
+  struct tm  tm;
+
+ if(DEBUG)
+  printf("Julian Date  %f \n",JD);
+ if(DEBUG)
+  printf("Sunrise timeUTC %lf \n", calcSunriseUTC( JD,  latitude,  longitude));
+ if(DEBUG)
+  printf("Sunset  timeUTC %lf \n", calcSunsetUTC( JD,  latitude,  longitude));
+
+  tm.tm_year= year-1900;
+  tm.tm_mon=month-1;  /* Jan = 0, Feb = 1,.. Dec = 11 */
+  tm.tm_mday=day;
+  tm.tm_hour=0;
+  tm.tm_min=0;
+  tm.tm_sec=0;
+  tm.tm_isdst=-1;
+
+  seconds = mktime(&tm);
+  if(DEBUG)
+   printf("Number of seconds %ld\n",seconds);
+  if(DEBUG)
+   printf("Number of year %d\n",year);
+  int delta;
+
+  dst=tm.tm_isdst;
+
+  ptm = gmtime ( &seconds );
+  delta= ptm->tm_hour;
+
+  if(DEBUG)
+    printf("delta=%d dst=%d\n",delta,dst);
+
+  tseconds= seconds;
+  if(DEBUG)
+   printf("Number of seconds %ld\n",seconds);
+
+  seconds+=calcSunsetUTC( JD, latitude, longitude)*60;
+  seconds= seconds - delta*3600;
+  return seconds;
+}
+
+
+int get_current(void)
+{
+ 
+  time_t seconds;
+
+  seconds = time(NULL);
+  return seconds;
+}
+
