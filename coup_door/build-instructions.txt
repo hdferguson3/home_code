@@ -1,4 +1,7 @@
 gcc main.c sunrise.c -o coup_door -lm -lwiringPi
 
 // see wiring instructions here: https://github.com/WiringPi/WiringPi/blob/master/pins/pins.pdf
+// Door main uses WirpingPi pins 4(GPIO.23, header 16) and 5(GPIO.24, header 18)
 // cytron motor controller md10c-R3
+// RTC pcf8523
+// RTC setup   https://pimylifeup.com/raspberry-pi-rtc/
