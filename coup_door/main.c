@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <time.h>
 #include <string.h>
 #include <stdbool.h>
@@ -53,8 +54,18 @@ int get_currentTime(void)
 
 
 int main () {
+   wiringPiSetup(); // Init wiringPi
+   pinMode(4, OUTPUT); pinMode(5, OUTPUT); // Set pin modes
+   printf("Starting Coup Door program.\n");
+   printf("Close the door first, it might need to stay closed.\n");
 
-   printf("Starting of program...\n");
+   // Close the door first if open
+   digitalWrite(4, HIGH); digitalWrite(5, LOW);
+   sleep(30);
+   digitalWrite(4, LOW); digitalWrite(5, LOW);
+   doorState = false;
+
+   printf("Let's get started...\n");
    if (doorState == false) {
       printf("Door state is closed.\n");
    }
@@ -64,9 +75,6 @@ int main () {
    openlog("Coup Door", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
    syslog(LOG_INFO, "Coup Door program start...");
    closelog();
-   wiringPiSetup();
-   pinMode(4, OUTPUT); pinMode(5, OUTPUT); //Sets pins to output
-   digitalWrite(4, LOW); digitalWrite(5, LOW); //Initialized to default
 
    while(1) {
 
